@@ -14,7 +14,12 @@
   function updateModel () {
     return new Promise(resolve => {
       countryName = new window.Chance().country({full: true});
-      resolve();
+      return window.fetch(`https://country-images.herokuapp.com/image?q=${encodeURIComponent(countryName)}`)
+        .then(response => response.json())
+        .then(data => {
+          imageSrc = data.url;
+          resolve();
+        });
     });
   }
 
