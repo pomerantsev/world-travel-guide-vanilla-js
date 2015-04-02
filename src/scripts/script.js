@@ -1,39 +1,35 @@
 (function () {
-  let component,
-      countryName,
-      imageSrc;
-
-  let getTemplate = () => `
-    <h2>${countryName}</h2>
+  let getTemplate = scope => `
+    <h2>${scope.countryName}</h2>
     <div>
       <img class="country-image"
-           src="${imageSrc}">
+           src="${scope.imageSrc}">
     </div>
   `;
 
   function updateModel () {
-    return new Promise(resolve => {
-      countryName = new window.Chance().country({full: true});
-      return window.fetch(`https://country-images.herokuapp.com/image?q=${encodeURIComponent(countryName)}`)
-        .then(response => response.json())
-        .then(data => {
-          imageSrc = data.url;
-          resolve();
-        });
-    });
+    let countryName = new window.Chance().country({full: true});
+    return window.fetch(`https://country-images.herokuapp.com/image?q=${encodeURIComponent(countryName)}`)
+      .then(response => response.json())
+      .then(data => {
+        let imageSrc = data.url;
+        return {countryName, imageSrc};
+      });
   }
 
-  function updateComponent () {
+  function updateComponent (component) {
     component.style.opacity = 0;
-    updateModel().then(() => {
-      component.innerHTML = getTemplate();
+    updateModel().then(model => {
+      component.innerHTML = getTemplate(model);
       component.style.opacity = 1;
     });
   }
 
   window.addEventListener('load', function () {
-    component = document.getElementById('js-component-container');
-    updateComponent();
-    document.getElementById('js-update-button').addEventListener('click', updateComponent);
+    let component = document.getElementById('js-component-container');
+    updateComponent(component);
+    document.getElementById('js-update-button').addEventListener('click', function () {
+      updateComponent(component);
+    });
   });
 })();
